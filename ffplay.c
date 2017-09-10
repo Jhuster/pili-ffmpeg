@@ -1835,7 +1835,7 @@ static int get_video_frame(VideoState *is, AVFrame *frame)
                 break;
         }
         long long pts = av_frame_get_best_effort_timestamp(frame);
-        av_log(NULL, AV_LOG_DEBUG, "decode video frame, [%s], pts: %lld \n", pict_type, fftime_to_milliseconds(pts, is->video_st->time_base));
+        av_log(NULL, AV_LOG_VERBOSE, "decode video frame, [%s], pts: %lld \n", pict_type, fftime_to_milliseconds(pts, is->video_st->time_base));
 
         frame->sample_aspect_ratio = av_guess_sample_aspect_ratio(is->ic, is->video_st, frame);
 
@@ -2101,7 +2101,7 @@ static int audio_thread(void *arg)
         if (got_frame) {
             /* add by @Jhuster, print the packet pts */
             long long pts = av_frame_get_best_effort_timestamp(frame);
-            av_log(NULL, AV_LOG_DEBUG, "decode audio frame, pts: %lld \n", fftime_to_milliseconds(pts, is->audio_st->time_base));
+            av_log(NULL, AV_LOG_VERBOSE, "decode audio frame, pts: %lld \n", fftime_to_milliseconds(pts, is->audio_st->time_base));
 
                 tb = (AVRational){1, frame->sample_rate};
 
@@ -3129,11 +3129,11 @@ static int read_thread(void *arg)
             /* add by @Jhuster, print the packet pts and other info */
             int keyframe = (pkt->flags & AV_PKT_FLAG_KEY) == 1;
             if (pkt->stream_index == is->audio_stream) {
-                av_log(NULL, AV_LOG_DEBUG, "read audio frame, keyframe: %d, pts: %4lld, dts: %4lld \n", keyframe, pkt->pts, pkt->dts);
+                av_log(NULL, AV_LOG_VERBOSE, "read audio frame, keyframe: %d, pts: %4lld, dts: %4lld \n", keyframe, pkt->pts, pkt->dts);
             } else if (pkt->stream_index == is->video_stream) {
-                av_log(NULL, AV_LOG_DEBUG, "read video frame, keyframe: %d, pts: %4lld, dts: %4lld \n", keyframe, pkt->pts, pkt->dts);
+                av_log(NULL, AV_LOG_VERBOSE, "read video frame, keyframe: %d, pts: %4lld, dts: %4lld \n", keyframe, pkt->pts, pkt->dts);
             } else {
-                av_log(NULL, AV_LOG_DEBUG, "read packet unknown type !\n");
+                av_log(NULL, AV_LOG_VERBOSE, "read packet unknown type !\n");
             }
         }
         /* check if packet is in play range specified by user, then queue, otherwise discard */
