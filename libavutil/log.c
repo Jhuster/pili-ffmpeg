@@ -39,6 +39,7 @@
 #include "common.h"
 #include "internal.h"
 #include "log.h"
+#include <sys/time.h>
 
 #if HAVE_PTHREADS
 #include <pthread.h>
@@ -341,6 +342,17 @@ void av_log_default_callback(void* ptr, int level, const char* fmt, va_list vl)
         count = 0;
     }
     strcpy(prev, line);
+
+    /* add by @Jhuster, add `date-time-ms` to output log */
+    char datetime[40];
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    struct tm* ptm = localtime(&tv.tv_sec);
+    strftime (datetime, sizeof(datetime), "%Y-%m-%d %H:%M:%S", ptm);
+    long milliseconds = tv.tv_usec / 1000;
+    snprintf(datetime, sizeof(datetime), "%s.%03ld ", datetime, milliseconds);
+    colored_fputs(av_clip(level >> 3, 0, NB_LEVELS - 1), tint >> 8, datetime);
+
     sanitize(part[0].str);
     colored_fputs(type[0], 0, part[0].str);
     sanitize(part[1].str);
