@@ -105,6 +105,10 @@ const int program_birth_year = 2003;
 
 #define CURSOR_HIDE_DELAY 1000000
 
+/* convert macro for fftime & milliseconds */
+#define fftime_to_milliseconds(ts, timebase)   (ts * 1000 * timebase.num / timebase.den)
+#define milliseconds_to_fftime(ms, timebase) (ms * timebase.den / (timebase.num * 1000))
+
 static unsigned sws_flags = SWS_BICUBIC;
 
 typedef struct MyAVPacketList {
@@ -3099,6 +3103,15 @@ static int read_thread(void *arg)
             continue;
         } else {
             is->eof = 0;
+            /* add by @Jhuster, print the packet pts and other info */
+            int keyframe = (pkt->flags & AV_PKT_FLAG_KEY) == 1;
+            if (pkt->stream_index == is->audio_stream) {
+                av_log(NULL, AV_LOG_VERBOSE, "read audio frame, keyframe: %d, pts: %4lld, dts: %4lld \n", keyframe, pkt->pts, pkt->dts);
+            } else if (pkt->stream_index == is->video_stream) {
+                av_log(NULL, AV_LOG_VERBOSE, "read video frame, keyframe: %d, pts: %4lld, dts: %4lld \n", keyframe, pkt->pts, pkt->dts);
+            } else {
+                av_log(NULL, AV_LOG_VERBOSE, "read packet unknown type !\n");
+            }
         }
         /* check if packet is in play range specified by user, then queue, otherwise discard */
         stream_start_time = ic->streams[pkt->stream_index]->start_time;
